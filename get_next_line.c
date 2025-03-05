@@ -12,73 +12,95 @@
 
 #include "get_next_line.h"
 
-static char	*allocate_line(char *line, size_t line_len)
+char *get_next_line(int fd)
 {
-	line = (char *)malloc(line_len + 1);
-	if (!line)
-		return (NULL);
-	return (line);
+    static char buffer[BUFFER_SIZE + 1];
+    static size_t buffer_pos = 0;
+    static ssize_t bytes_read = 0;
+    char *line = NULL;
+    size_t line_len = 0;
+
+    if (fd < 0 || BUFFER_SIZE <= 0)
+        return (NULL);
+
+    while (1)
+    {
+        if (buffer_pos >= (size_t)bytes_read)
+        {
+            bytes_read = read(fd, buffer, BUFFER_SIZE);
+            if (bytes_read <= 0)
+            {
+                if (line_len > 0)
+                    return (line);
+                return (NULL);
+            }
+            buffer_pos = 0;
+        }
+
+        char current_char = buffer[buffer_pos++];
+        line = ft_realloc(line, line_len + 1);
+        if (!line)
+            return (NULL);
+        line[line_len++] = current_char;
+
+        if (current_char == '\n')
+            break;
+    }
+
+    line = ft_realloc(line, line_len + 1);
+    if (!line)
+        return (NULL);
+    line[line_len] = '\0';
+
+    return (line);
 }
 
-static char	*read_to_buffer(int fd, char *buffer, size_t *bytes_read)
+char *ft_substr(char const *s, unsigned int start, size_t len)
 {
-	*bytes_read = read(fd, buffer, BUFFER_SIZE);
-	if (*bytes_read <= 0)
-		return (NULL);
-	buffer[*bytes_read] = '\0';
-	return (buffer);
+    char *result;
+    size_t i;
+
+    if (!s)
+        return (NULL);
+
+    if (start >= ft_strlen(s))
+        return (ft_strdup(""));
+
+    if (len > ft_strlen(s + start))
+        len = ft_strlen(s + start);
+
+    result = malloc(len + 1);
+    if (!result)
+        return (NULL);
+
+    i = 0;
+    while (i < len)
+    {
+        result[i] = s[start + i];
+        i++;
+    }
+    result[i] = '\0';
+    return (result);
 }
 
-static char	*append_char(char *line, size_t *line_len, char current_char)
+void *ft_realloc(void *ptr, size_t size)
 {
-	line = realloc(line, *line_len + 1);
-	if (!line)
-		return (NULL);
-	line[*line_len] = current_char;
-	(*line_len)++;
-	return (line);
-}
+    void *new_ptr;
 
-static char	*finalize_line(char *line, size_t line_len)
-{
-	line = realloc(line, line_len + 1);
-	if (!line)
-		return (NULL);
-	line[line_len] = '\0';
-	return (line);
-}
+    if (!ptr)
+        return (malloc(size));
 
-char	*get_next_line(int fd)
-{
-	static char		buffer[BUFFER_SIZE + 1];
-	static size_t	buffer_pos = 0;
-	static ssize_t	bytes_read = 0;
-	char			*line ;
-	size_t			line_len;
-	char			current_char;
+    if (!size)
+    {
+        free(ptr);
+        return (NULL);
+    }
 
-	*line = NULL;
-	line_len = 0;
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (NULL);
+    new_ptr = malloc(size);
+    if (!new_ptr)
+        return (NULL);
 
-	while (1)
-	{
-		if (buffer_pos >= (size_t)bytes_read)
-		{
-			if (!read_to_buffer(fd, buffer, &bytes_read))
-				return (line_len > 0 ? line : NULL);
-			buffer_pos = 0;
-		}
-
-		current_char = buffer[buffer_pos++];
-		line = append_char(line, &line_len, current_char);
-		if (!line)
-			return (NULL);
-
-		if (current_char == '\n')
-			break;
-	}
-
-	return (finalize_line(line, line_len));
+    ft_memcpy(new_ptr, ptr, size);
+    free(ptr);
+    return (new_ptr);
 }
