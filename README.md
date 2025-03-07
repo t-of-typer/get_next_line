@@ -18,7 +18,26 @@ El proyecto **Get Next Line** tiene como objetivo programar una función en C qu
 - Resolver problemas con buffer size configurable y múltiples file descriptors.
 
 ---
+## Conceptos importantes
 
+### ¿Qué es un File Descriptor?
+
+Un **file descriptor** (descriptor de archivo) es un número entero que el kernel del sistema operativo asigna a un archivo abierto, un socket, una tubería (pipe) o cualquier otro recurso que pueda ser leído o escrito. Los file descriptors permiten a los programas manejar archivos y otros recursos de manera uniforme y abstracta.
+
+#### Funciones Básicas de un File Descriptor
+
+1. **Lectura y Escritura**:
+   - **read(fd, buffer, tam)**: Lee bytes del file descriptor `fd` y los coloca en un buffer de tamaño `tam`.
+   - **write(fd, buffer, tam)**: Toma los primeros `tam` bytes del buffer y los envía al file descriptor `fd`.
+
+2. **Descriptores Estándar**:
+   - **0**: Entrada estándar (stdin)
+   - **1**: Salida estándar (stdout)
+   - **2**: Error estándar (stderr).
+
+3. **Gestión de Recursos**:
+   - Los file descriptors permiten a los programas manejar archivos, sockets y otros recursos de manera uniforme y abstracta, sin preocuparse por los detalles del hardware subyacente.
+---
 ## 🛠️ Instrucciones Generales
 
 ### Requisitos
